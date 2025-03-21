@@ -1,0 +1,80 @@
+Substance,Weight (g/cm³),Specific Gravity,Strength,Flammability
+Alcohol,0.789,0.79,Very weak,0.85
+Petroleum Products,Various,Various,Various,0.92
+Gasoline,Various,Various,Various,0.91
+Propane,1.88,1.88,Very low,0.78
+Salt,2.165,2.17,High,0.1
+Iron,7.87,7.87,Very high,0.12
+Zinc,7.14,7.14,High,0.14
+Aluminum,2.7,2.7,High,0.15
+Plastic,Various,Various,Various,0.65
+Paper,Various,Various,Various,0.75
+Wood,Various,Various,Various,0.8
+Natural Leather,Various,Various,Various,0.82
+Ammonia,0.771,0.77,Very weak,0.88
+Methane,0.656,0.656,Weak,0.73
+Acetylene,0.0011,0.0011,Very weak,0.95
+Gunpowder,Various,Various,Various,0.98
+Copper,8.96,8.96,High,0.11
+Glass,2.5,2.5,Low,0.09
+Ceramic,Various,Various,Various,0.08
+Titanium,4.54,4.54,Very high,0.16
+Rubber,Various,Various,Various,0.68
+Sodium,0.97,0.97,Weak,0.97
+Iron Products,Various,Various,Various,0.18
+Copper Coins,Various,Various,Various,0.13
+Nickel,8.91,8.91,High,0.14
+Aluminum Can,Various,Various,Various,0.16
+Iron Ore,Various,Various,Various,0.12
+Iron Wire,Various,Various,Various,0.1
+Nylon,Various,Various,Various,0.5
+Polyethylene,Various,Various,Various,0.4
+Polystyrene,Various,Various,Various,0.55
+PVC,Various,Various,Various,0.6
+Alkyl Benzene,Various,Various,Various,0.9
+Isopropyl Alcohol,Various,Various,Various,0.85
+Acetic Acid,Various,Various,Various,0.88
+Mineral Oil,Various,Various,Various,0.9
+Mercury,13.546,13.546,Weak,0.01
+Ammonium Nitrate,Various,Various,Various,0.92
+Nitrates,Various,Various,Various,0.85
+Caffeine,Various,Various,Various,0.3
+Sulfuric Acid,Various,Various,Various,0.78
+Carbon Disulfide,Various,Various,Various,0.92
+Sulfuric Acid,Various,Various,Various,0.85
+Copper Sulfate,Various,Various,Various,0.88
+Soda,Various,Various,Various,0.15
+Alkali,Various,Various,Various,0.02
+Calcium,1.54,1.54,Very high,0.05
+Magnesium,1.738,1.738,High,0.08
+Zinc Powder,Various,Various,Various,0.14
+Cadmium,8.65,8.65,High,0.12
+Lithium,0.534,0.534,Weak,0.03
+Barium,3.594,3.594,Weak,0.09
+Arsenic,5.776,5.776,Weak,0.11
+Phosphorus,1.82,1.82,Low,0.07
+Glass Fiber,Various,Various,Various,0.08
+Ceramic Fiber,Various,Various,Various,0.07
+Granite,2.75,2.75,High,0.06
+Marble Tile,2.71,2.71,Low,0.05
+Tungsten,19.25,19.25,High,0.14
+Strontium,2.64,2.64,Low,0.08
+Teflon,Various,Various,Various,0.6
+Nylon Paper,Various,Various,Various,0.45
+Fossil Fuels,Various,Various,Various,0.95
+Sunflower Oil,0.92,0.92,Weak,0.85
+Chloroform,1.483,1.483,Low,0.92
+Diamond,3.52,3.52,Very high,0.03
+Ash,Various,Various,Various,0.05
+Phosphates,Various,Various,Various,0.9
+Phosphorothioic Acid,Various,Various,Various,0.6
+Asphalt,Various,Various,Various,0.95
+Uranium,19.05,19.05,Very high,0.92
+Hydrogen Peroxide,1.45,1.45,Very low,0.98
+Chemical Waste,Various,Various,Various,0.9
+Arsenic Compounds,Various,Various,Various,0.9
+Diesel Fuel,Various,Various,Various,0.9
+Natural Gas,0.656,0.656,Weak,0.95
+Starch,Various,Various,Various,0.25
+Urea,1.32,1.32,Weak,0.6
+Phenolic Resin,Various,Various,Various,0

@@ -80,6 +80,7 @@ def main() :
     
     try : 
         print('Hello Mars') # 정상 출력 확인
+        print(__file__)
         
         # 로그 파일 내역 읽어오고 출력도 수행
         lineInstanceList = readAndPrintLogFile(lineInstanceList)
