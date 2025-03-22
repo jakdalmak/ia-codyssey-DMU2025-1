@@ -48,39 +48,39 @@ def over70Flam(dictDataList) :
 
 def binarySave(over70PerFlamList) : 
     with open(BIN_SAVE_PATH, 'wb') as writeBinFile :
-            fieldnames = over70PerFlamList[0].keys()
+        fieldnames = over70PerFlamList[0].keys()
             
-            writeBinFile.write(len(over70PerFlamList).to_bytes(4, 'little')) # 리스트 내의 딕셔너리 전체 개수를 저장 
+        writeBinFile.write(len(over70PerFlamList).to_bytes(4, 'little')) # 리스트 내의 딕셔너리 전체 개수를 저장 
             
-            for dictionary in over70PerFlamList :
-                for field in fieldnames:
-                    key_bytes = field.encode('utf-8')
-                    value = dictionary[field]
+        for dictionary in over70PerFlamList :
+            for field in fieldnames:
+                key_bytes = field.encode('utf-8')
+                value = dictionary[field]
 
-                    # key 저장 - key 자료형은 str 고정이므로 별도의 표기목적 바이트 설정하지 않음!!
-                    writeBinFile.write(len(key_bytes).to_bytes(1, 'little'))
-                    writeBinFile.write(key_bytes)
+                # key 저장 - key 자료형은 str 고정이므로 별도의 표기목적 바이트 설정하지 않음!!
+                writeBinFile.write(len(key_bytes).to_bytes(1, 'little'))
+                writeBinFile.write(key_bytes)
 
-                    # value 저장
-                    # 문자열인 경우
-                    if isinstance(value, str): #isinstance() 메소드 이용하여 변수 자료형 확인
-                        writeBinFile.write(b'\x01') # str임을 나타내기위한 표기목적 1바이트
-                        val_bytes = value.encode('utf-8')
-                        writeBinFile.write(len(val_bytes).to_bytes(1, 'little'))
-                        writeBinFile.write(val_bytes)
+                # value 저장
+                # 문자열인 경우
+                if isinstance(value, str): #isinstance() 메소드 이용하여 변수 자료형 확인
+                    writeBinFile.write(b'\x01') # str임을 나타내기위한 표기목적 1바이트
+                    val_bytes = value.encode('utf-8')
+                    writeBinFile.write(len(val_bytes).to_bytes(1, 'little'))
+                    writeBinFile.write(val_bytes)
 
-                    # 숫자 (int/float) 처리
-                    elif isinstance(value, int):
-                        writeBinFile.write(b'\x02') # int임을 나타내기위한 표기목적 1바이트
-                        writeBinFile.write((4).to_bytes(1, 'little'))  # 길이 고정: 4바이트
-                        writeBinFile.write(value.to_bytes(4, 'little'))
+                # 숫자 (int/float) 처리
+                elif isinstance(value, int):
+                    writeBinFile.write(b'\x02') # int임을 나타내기위한 표기목적 1바이트
+                    writeBinFile.write((4).to_bytes(1, 'little'))  # 길이 고정: 4바이트
+                    writeBinFile.write(value.to_bytes(4, 'little'))
 
-                    elif isinstance(value, float): 
-                        writeBinFile.write(b'\x03') # float임을 나타내기위한 표기목적 1바이트
+                elif isinstance(value, float): 
+                    writeBinFile.write(b'\x03') # float임을 나타내기위한 표기목적 1바이트
 
-                        # float 형의 처리를 위해서는 struct가 필요하다.
-                        writeBinFile.write((4).to_bytes(1, 'little'))  # 4바이트 float
-                        writeBinFile.write(struct.pack('f', value))
+                    # float 형의 처리를 위해서는 struct가 필요하다.
+                    writeBinFile.write((4).to_bytes(1, 'little'))  # 4바이트 float
+                    writeBinFile.write(struct.pack('f', value))
 
 
 def binaryRead(dicCount) :
