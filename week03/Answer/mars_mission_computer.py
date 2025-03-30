@@ -17,19 +17,19 @@ class DummySensor :
             if not isinstance(min_val, value_type) or not isinstance(max_val, value_type):
                 raise TypeError(f"{key} 범위 값은 {value_type.__name__} 타입이어야 합니다.")
             if min_val >= max_val:
-                raise ValueError("min은 max보다 작아야 합니다.")
+                raise ValueError('min은 max보다 작아야 합니다.')
             self._ranges[key] = (min_val, max_val)
         return property(getter, setter) # Property라는 데코레이터 객체 이용. 데코레이터는 일종의 어노테이션.. 같은느낌???
 
     # getter, setter를 설정해둔다.
     # property 설정은 클래스 단위에서 시행되어야하므로 아래와 같이 class 메소드들의 외부에서 수행.
     # 이 값에 대해 클래스 내부에서는 self. 이용하여 접근하고, 클래스 외부에서는 클래스명. 이용하여 접근
-    inter_temp_range = _make_range_get_set_property("inter_temp", int)
-    exter_temp_range = _make_range_get_set_property("exter_temp", int)
-    inter_humi_range = _make_range_get_set_property("inter_humi", float)
-    exter_illum_range = _make_range_get_set_property("exter_illum", int)
-    inter_co2_range = _make_range_get_set_property("inter_co2", float)
-    inter_oxy_range = _make_range_get_set_property("inter_oxy", float)
+    inter_temp_range = _make_range_get_set_property('inter_temp', int)
+    exter_temp_range = _make_range_get_set_property('exter_temp', int)
+    inter_humi_range = _make_range_get_set_property('inter_humi', float)
+    exter_illum_range = _make_range_get_set_property('exter_illum', int)
+    inter_co2_range = _make_range_get_set_property('inter_co2', float)
+    inter_oxy_range = _make_range_get_set_property('inter_oxy', float)
         
     
     
