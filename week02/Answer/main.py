@@ -49,6 +49,7 @@ def over70Flam(dictDataList) :
 def binarySave(over70PerFlamList) : 
     with open(BIN_SAVE_PATH, 'wb') as writeBinFile :
         fieldnames = over70PerFlamList[0].keys()
+        print(fieldnames)
             
         writeBinFile.write(len(over70PerFlamList).to_bytes(4, 'little')) # 리스트 내의 딕셔너리 전체 개수를 저장 
             
