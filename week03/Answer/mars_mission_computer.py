@@ -30,13 +30,14 @@ class DummySensor :
     exter_illum_range = _make_range_get_set_property('exter_illum', int)
     inter_co2_range = _make_range_get_set_property('inter_co2', float)
     inter_oxy_range = _make_range_get_set_property('inter_oxy', float)
-        
+    
+    # __slots__를 통해 DummySensor에 의도되지 않은 필드 변수 설정되는 것 방지.
+    # ex. DummySensor.imTroll = 'hahaha' 와 같이 의도되지 않은 필드 추가되는 것 방지 가능.
+    __slots__ = ['_fieldnames', '_ranges', '_env_values']
     
     
     def __init__(self) :
-        # __slots__를 통해 DummySensor에 의도되지 않은 필드 변수 설정되는 것 방지.
-        # ex. DummySensor.imTroll = 'hahaha' 와 같이 의도되지 않은 필드 추가되는 것 방지 가능.
-        __slots__ = ['_fieldnames', '_ranges', '_env_values']
+        
         
         # 필드명 변경되거나 관리되는 경우 위한 리스트화
         # 하드코딩해두면 나중에 겁나 불편하니까...
