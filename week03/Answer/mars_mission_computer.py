@@ -132,9 +132,10 @@ def main() :
     ds = set_sensor()
     print_sensor(ds.get_env())
     
-    
-try : 
-    main()
-except Exception as e:
-    print(f"Unexpected Exception: {type(e).__name__} => {e}")  
-    sys.exit(1)
+
+if(__name__ == '__main__') :
+    try : 
+        main()
+    except Exception as e:
+        print(f"Unexpected Exception: {type(e).__name__} => {e}")  
+        sys.exit(1)
