@@ -11,6 +11,8 @@
 # 혹시나 week05 내부 파일만 사용하게되면 오류가 발생합니다. 전체 Repository를 pull해주시기 부탁드립니다.
 #
 
+# 참고 : https://github.com/giampaolo/psutil - psutil 라이브러리 깃허브 
+
 import sys
 import os
 import platform
@@ -416,15 +418,14 @@ except Exception as e:
     sys.exit(1)
 
 # 아래 값들을 다른 main.py에서 사용할 경우...
-# 이렇게 저장하면 일반적인 경우라면 스냅샷이 되어버림.
-# 그래서 보통은...
+# 만약 객체 내 필드 값 업데이트를 딕셔너리를 새로 만들어서 할당하는 식을 사용했다면...
 # import mars_mission_computer as comSys
 # comSys.runComputer.computer_info 와 같이 runComputer 객체에 대해 직접적으로 접근해야함.
 
 # 하지만!!! 지금 computer_info, system_load_percent에 대한 값의 할당은
 # 1) 본 코드가 실행 될 때 마다
-# 2) MissionComputer() class 내부의 dict 들에 대해 '업데이트'하여 사용하고있다.
-# 즉, 딕셔너리 주소를 먼저 할당하고 사용중이므로, main.py에서 아래와 같이 사용하여
+# 2) MissionComputer() class 내부의 __init__에서 """이미 선언된 기존 dict를 '업데이트'하여 사용"""하고있다.
+# 즉, 딕셔너리 주소를 먼저 할당하고 기존 주소를 계속 사용중이므로, main.py에서 아래와 같이 사용하여
 
 # comSys.system_load_percent {{A}}
 # comSys.get_mission_computer_load()
@@ -432,6 +433,7 @@ except Exception as e:
 
 # 와 같이 진행해도 B는 A와 다른 값(새로 업데이트된 값)을 나타낸다.
 # 아래 코드는 객체 내의 딕셔너리를 깊은 복사 했으니까 같은 주소 나타내기 때문.
+# 딕셔너리를 새로 만들어서 할당하면 새 주소를 가리키게 되어버려 문제가 발생하지만 아래 방식은 아니라는 것.
 
 computer_info = runComputer.computer_info
 system_load_percent = runComputer.system_load_percent
