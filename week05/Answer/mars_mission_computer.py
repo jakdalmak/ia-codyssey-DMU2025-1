@@ -398,16 +398,46 @@ class MissionComputer :
                 file.write('\n'.join(f"{key} : {value}" for key, value in self.system_load_percent.items()))
 
                 
-            
-if __name__ == '__main__':
-    try:
-        ds = DummySensor()
-        ds.set_env()
-        runComputer = MissionComputer(ds)
 
-        runComputer.get_mission_computer_info()
-        runComputer.get_mission_computer_load()
-        # runComputer.write_setting_txt()
-    except Exception as e:
-        print(f'Unexpected Exception: {type(e).__name__} => {e}')
-        sys.exit(1)
+
+
+           
+
+try:
+    ds = DummySensor()
+    ds.set_env()
+    runComputer = MissionComputer(ds)
+
+    runComputer.get_mission_computer_info()
+    runComputer.get_mission_computer_load()
+    # runComputer.write_setting_txt()
+except Exception as e:
+    print(f'Unexpected Exception: {type(e).__name__} => {e}')
+    sys.exit(1)
+
+# 아래 값들을 다른 main.py에서 사용할 경우...
+# 이렇게 저장하면 일반적인 경우라면 스냅샷이 되어버림.
+# 그래서 보통은...
+# import mars_mission_computer as comSys
+# comSys.runComputer.computer_info 와 같이 runComputer 객체에 대해 직접적으로 접근해야함.
+
+# 하지만!!! 지금 computer_info, system_load_percent에 대한 값의 할당은
+# 1) 본 코드가 실행 될 때 마다
+# 2) MissionComputer() class 내부의 dict 들에 대해 '업데이트'하여 사용하고있다.
+# 즉, 딕셔너리 주소를 먼저 할당하고 사용중이므로, main.py에서 아래와 같이 사용하여
+
+# comSys.system_load_percent {{A}}
+# comSys.get_mission_computer_load()
+# comSys.system_load_percent {{B}}
+
+# 와 같이 진행해도 B는 A와 다른 값(새로 업데이트된 값)을 나타낸다.
+# 아래 코드는 객체 내의 딕셔너리를 깊은 복사 했으니까 같은 주소 나타내기 때문.
+
+computer_info = runComputer.computer_info
+system_load_percent = runComputer.system_load_percent
+
+# 위에 네 줄 요약 : 
+# 겁나 길게 써놨는데, 걍 결론은 만약 본 .py 파일을 import하는 main.py에서 
+# computer_info, system_load_percent에 대해 접근 시
+# comSys.runComputer.변수명 으로 접근하면 귀찮으니까
+# comSys.변수명으로 접근하도록 구현했고 이래도 문제 없다는 말입니다. 
