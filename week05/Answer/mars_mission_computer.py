@@ -1,9 +1,15 @@
 #
-# 주의!!! 반드시, 아래 명령어를 사용하여 psutil패키지를 설치해주세요.
+# 1) 주의!!! 반드시, 아래 명령어를 사용하여 psutil패키지를 설치해주세요.
 # pip install psutil
 #
-
-
+# 2) setting.txt 내부의 json 양식 값을 true/false로 수정하여
+# 출력되는 json 값의 양식을 설정 가능합니다.
+# 보너스 과제 정상 동작 확인을 위해 setting.txt의 cpu/RAM 실시간 사용량 표기 여부가 false로 설정되어있습니다.
+# 이 점 참고하여 평가해주시기 바랍니다.
+#
+# 3) get_time_with_ctypes가 week04 디렉토리에 위치해있습니다.
+# 혹시나 week05 내부 파일만 사용하게되면 오류가 발생합니다. 전체 Repository를 pull해주시기 부탁드립니다.
+#
 
 import sys
 import os
@@ -11,6 +17,7 @@ import platform
 import ctypes
 import random
 import time
+import json
 import psutil
 
 BASE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -26,8 +33,6 @@ week04_answer_dir = os.path.abspath(week04_answer_dir)
 sys.path.append(week04_answer_dir)
 
 import get_time_with_ctypes as my_time
-
-
 
 
 class DummySensor:
@@ -143,7 +148,6 @@ class DummySensor:
     def get_env(self):
         return self.__env_values
 
-
 # MissionComputer 클래스 구현
 class MissionComputer :
     def __init__(self, sensor):
@@ -166,7 +170,10 @@ class MissionComputer :
         """
         self.computer_info = {} # 컴퓨터 기본 정보를 저장하는 딕셔너리
         self.system_load_percent = {} # 컴퓨터의 현재 CPU 및 메모리 사용량을 저장하는 딕셔너리.
-    
+        with open(COM_SETTING_TXT_DIRECTORY, 'r') as settingFile :
+            setting_str = settingFile.read() # 1개의 str 객체로 전부 읽어오기
+            self.computer_system_print_settings = json.loads(setting_str) # 딕셔너리로 기입
+        
     def _dict_to_json_str(self, dictonary):
         # JSON 형태로 변환. 키와 문자열은 " "로 감싸야 json 양식이 충족된다!
         items = []
@@ -251,8 +258,11 @@ class MissionComputer :
     def get_mission_computer_info(self):
         
         # 1) 운영체제 이름과 버전
-        self.computer_info['os_name'] = platform.system()     # "Windows", "Linux", "Darwin", etc.
-        self.computer_info['os_version'] = platform.release() # 예: "10" (Windows 10), "5.15.0-67-generic" (Ubuntu 커널), etc.
+        if self.computer_system_print_settings['os_name'] :
+            self.computer_info['os_name'] = platform.system()     # "Windows", "Linux", "Darwin", etc.
+        
+        if self.computer_system_print_settings['os_version'] :
+            self.computer_info['os_version'] = platform.release() # 예: "10" (Windows 10), "5.15.0-67-generic" (Ubuntu 커널), etc.
 
         # 2) CPU 타입, CPU 코어 수
         #    - processor()가 공백을 반환하거나 OS별 차이가 있을 수 있어 
@@ -261,62 +271,68 @@ class MissionComputer :
         #    - processor() == CPU 실제 모델명(상세), 일부 os 미지원
         #    - machine() == 현재 머신의 하드웨어 타입(아키텍처 이름)을 반환.
         #    - or 이용하여 processor() 값이 빈 문자열일경우 뒤의 값 사용.(공백 나오는거 본적없긴함..)
-        self.computer_info['cpu_type'] = (platform.processor() or platform.machine() or '확인 불가. 문의 바랍니다')
-        self.computer_info['cpu_cores'] = os.cpu_count()
+        if self.computer_system_print_settings['cpu_type'] :
+            self.computer_info['cpu_type'] = (platform.processor() or platform.machine() or '확인 불가. 문의 바랍니다')
+        
+        if self.computer_system_print_settings['cpu_cores'] :
+            self.computer_info['cpu_cores'] = os.cpu_count()
 
         # 3) 메모리 용량(바이트 단위) - OS별 처리
         # 초기값은 None으로 설정.
-        mem_bytes = None
-        if self.computer_info['os_name'] == 'Windows':
-            # Windows에서는 ctypes를 이용해 WinAPI 호출
-            # ctypes에서 CDLL로 C 표준 라이브러리를 불러오듯
-            # WinDLL을 이용하면 Window API를 불러올 수 있다.
-            kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
-            mem_kb = ctypes.c_uint64(0)
-            
-            # 램의 '정확한 총량'을 제공하는 API..라는데요.
-            ret = kernel32.GetPhysicallyInstalledSystemMemory(ctypes.byref(mem_kb))
-            if ret != 0:
-                # GetPhysicallyInstalledSystemMemory()는 KB 단위 값을 반환
-                mem_bytes = mem_kb.value * 1024
-            else:
-                # 실패 시, 0을 반환.
-                # 메모리(RAM)가 존재하지 않는 파이선 구동 가능 기기는 있을 수 없다.
-                # 특히 본 코드가 실행되어 mem_bytes라는 변수가 존재하고, 0이라는 값이 할당되었다는 사실 자체가
-                # None을 이용하는 것보다 '메모리 값을 읽어오지 못했다'라는 뜻을 전달하는데 더 좋다고 보임.
-                mem_bytes = 0
-
-        elif self.computer_info['os_name'] in ('Linux', 'Darwin'):
-            # 유닉스 계열: sysconf로 물리 메모리 크기를 추정
-            # 유닉스 계열에서 구동되는 파이선은 os 기본 모듈 내에 sysconf라는 명칭의 함수를 지닌다고 함.
-            # 나는 윈도우라 모르겠는데..
-            if hasattr(os, "sysconf"):
-                try:
-                    # 페이지? : 물리 메모리 및 가상 메모리(HDD 등의 저장 공간 활용)에 대한 기본 단위
-                    # 즉, 하나의 페이지 크기가 바이트 기준 얼마인지 구하고, 그 값에 대해 물리 페이지 개수를 곱한다.
-                    
-                    page_size = os.sysconf("SC_PAGE_SIZE")      # 바이트 단위 페이지 크기
-                    phys_pages = os.sysconf("SC_PHYS_PAGES")    # 전체 물리 페이지 수
-                    mem_bytes = page_size * phys_pages
-                except (ValueError, OSError):
+        if self.computer_system_print_settings['memory_bytes'] :
+            mem_bytes = None
+            if platform.system() == 'Windows' :
+                # Windows에서는 ctypes를 이용해 WinAPI 호출
+                # ctypes에서 CDLL로 C 표준 라이브러리를 불러오듯
+                # WinDLL을 이용하면 Window API를 불러올 수 있다.
+                kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+                mem_kb = ctypes.c_uint64(0)
+                
+                # 램의 '정확한 총량'을 제공하는 API..라는데요.
+                ret = kernel32.GetPhysicallyInstalledSystemMemory(ctypes.byref(mem_kb))
+                if ret != 0:
+                    # GetPhysicallyInstalledSystemMemory()는 KB 단위 값을 반환
+                    mem_bytes = mem_kb.value * 1024
+                else:
+                    # 실패 시, 0을 반환.
+                    # 메모리(RAM)가 존재하지 않는 파이선 구동 가능 기기는 있을 수 없다.
+                    # 특히 본 코드가 실행되어 mem_bytes라는 변수가 존재하고, 0이라는 값이 할당되었다는 사실 자체가
+                    # None을 이용하는 것보다 '메모리 값을 읽어오지 못했다'라는 뜻을 전달하는데 더 좋다고 보임.
                     mem_bytes = 0
-            else:
-                mem_bytes = 0
-        else: # 이 else문에서는 mem_bytes 값이 None인 경우에 해당한다.
-            raise OSError(
-                '지원하지 않는 OS입니다. 개발자에게 문의해주세요.'
-            )
+
+            elif platform.system() in ('Linux', 'Darwin'):
+                # 유닉스 계열: sysconf로 물리 메모리 크기를 추정
+                # 유닉스 계열에서 구동되는 파이선은 os 기본 모듈 내에 sysconf라는 명칭의 함수를 지닌다고 함.
+                # 나는 윈도우라 모르겠는데..
+                if hasattr(os, "sysconf"):
+                    try:
+                        # 페이지? : 물리 메모리 및 가상 메모리(HDD 등의 저장 공간 활용)에 대한 기본 단위
+                        # 즉, 하나의 페이지 크기가 바이트 기준 얼마인지 구하고, 그 값에 대해 물리 페이지 개수를 곱한다.
+                        
+                        page_size = os.sysconf("SC_PAGE_SIZE")      # 바이트 단위 페이지 크기
+                        phys_pages = os.sysconf("SC_PHYS_PAGES")    # 전체 물리 페이지 수
+                        mem_bytes = page_size * phys_pages
+                    except (ValueError, OSError):
+                        mem_bytes = 0
+                else:
+                    mem_bytes = 0
+            else: # 이 else문에서는 mem_bytes 값이 None인 경우에 해당한다.
+                raise OSError(
+                    '지원하지 않는 OS입니다. 개발자에게 문의해주세요.'
+                )
+            
+            if mem_bytes == 0 :
+                raise OSError(
+                    '정상적으로 RAM 크기를 확인하지 못했습니다.'
+                )
+
+            # 보기 편하게 기가바이트 단위추가
+            self.computer_info["memory_bytes"] = mem_bytes
+            self.computer_info["memory_gb"] = mem_bytes // (1024 * 1024 * 1024)
         
-        if mem_bytes == 0 :
-            raise OSError(
-                '정상적으로 RAM 크기를 확인하지 못했습니다.'
-            )
-
-        # 보기 편하게 기가바이트 단위추가
-        self.computer_info["memory_bytes"] = mem_bytes
-        self.computer_info["memory_gb"] = mem_bytes // (1024 * 1024 * 1024)
-
-        print(self._dict_to_json_str(self.computer_info))
+        if len(self.computer_info) != 0:
+            print(self._dict_to_json_str(self.computer_info))
+        else : print('표기할 시스템 정보가 없습니다. setting.txt를 확인해주세요.')
     
     """
         psutil 라이브러리를 이용해 CPU/메모리 실시간 사용률을 측정.
@@ -334,28 +350,35 @@ class MissionComputer :
         #            그리고 보통 1초 샘플링으로 실시간 사용률 측정하는게 일반적이라고 함...
         #
 
-        
-        
+        # 참고 : 파이선은 if문 단락 내에서 만들어진 변수여도 같은 메소드 내라면 사용 가능함. 또 뭔 짓을 해놓은거지?
         # CPU 사용률(%) - interval=1.0이면 1초간 샘플링 진행.
-        try:
-            cpu_usage_percent = psutil.cpu_percent(interval=1.0)
-        except Exception as e:
-            raise RuntimeError(f"psutil, CPU 사용률 검출 실패: {e}") from e
+        if self.computer_system_print_settings['cpu_usage(%)'] :
+            try:
+                cpu_usage_percent = psutil.cpu_percent(interval=1.0, percpu=True)
+                if isinstance(cpu_usage_percent, list) :
+                    print('본 기기의 CPU 스레드 개수 ' + str(len(cpu_usage_percent)))
+            except Exception as e:
+                raise RuntimeError(f"psutil, CPU 사용률 검출 실패: {e}") from e
+            self.system_load_percent['cpu_usage(%)'] = cpu_usage_percent
 
         # 메모리 사용량(%) - psutil.virtual_memory()를 통해 전체 사용률 확인
-        try:
-            # svmem(total=34282242048, available=11765596160, percent=65.7, used=22516645888, free=11765596160)
-            memory_usage_percent = psutil.virtual_memory().percent
-        except Exception as e:
-            raise RuntimeError(f"psutil, 메모리 사용률 검출 실패 : {e}") from e
-
-        self.system_load_percent = {
-            "cpu_usage(%)": cpu_usage_percent,
-            "memory_usage(%)": memory_usage_percent
-        }
+        if self.computer_system_print_settings['memory_usage(%)'] :
+            try:
+                # svmem(total=34282242048, available=11765596160, percent=65.7, used=22516645888, free=11765596160)
+                memory_usage_percent = psutil.virtual_memory().percent
+            except Exception as e:
+                raise RuntimeError(f"psutil, 메모리 사용률 검출 실패 : {e}") from e
+            self.system_load_percent['memory_usage(%)'] = memory_usage_percent
         
-        print(self._dict_to_json_str(self.system_load_percent))
-        
+        if len(self.system_load_percent) != 0 :
+            print(self._dict_to_json_str(self.system_load_percent))
+        else : print('표기할 시스템 사용량이 없습니다. setting.txt를 확인해주세요.')
+    
+    """
+    # 잘못 이해해서 만든거.. settings.txt는 출력 결과를 보이는 목적이 아니라
+    # 출력 결과의 목록을 조정하기위한 일종의 리모콘으로 settings.txt를 활용하는게 목적.
+    # 아래 메소드 내용은 무시하기. 그래도 딕셔너리 합칠 때 유의사항 하나는 알았다.
+    """
     def write_setting_txt(self, isInfo=True, isLoadPer=True) :
         # 문제는 txt 파일을 요구한다.
         # 로그 파일이 아닌 txt를 요구한다는 것은, 시간을 두고 변환될 수 있는 데이터를 제공하라는게 아니라
@@ -380,11 +403,11 @@ if __name__ == '__main__':
     try:
         ds = DummySensor()
         ds.set_env()
-        RunComputer = MissionComputer(ds)
+        runComputer = MissionComputer(ds)
 
-        RunComputer.get_mission_computer_info()
-        RunComputer.get_mission_computer_load()
-        RunComputer.write_setting_txt()
+        runComputer.get_mission_computer_info()
+        runComputer.get_mission_computer_load()
+        # runComputer.write_setting_txt()
     except Exception as e:
         print(f'Unexpected Exception: {type(e).__name__} => {e}')
         sys.exit(1)

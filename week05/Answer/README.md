@@ -30,6 +30,7 @@ https://jakdalmak-work.notion.site/8-1d4f6bbbe13c8086a622db4a4a524852?pvs=4
 - 추가과제 1 - setting.txt 파일을 만들어서 출력되는 정보의 항목을 셋팅 할 수 있도록 코드를 수정한다.
 
   - 구현완료! write_setting_txt() 라는 명칭의 메소드로 구현되어있습니다.
+  - 수정완료! 문제 잘못 이해했었습니다.. 이제 setting.txt 내부의 json 내역이 true로 설정된 컴퓨터 시스템 정보 및 사용량 수치만 print로 표기됩니다.
 
 ### 구현 내역 상세 설명
 

@@ -1,6 +1,10 @@
-os_name : Windows
-os_version : 10
-cpu_type : AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD
-cpu_cores : 16
-memory_bytes : 34359738368
-memory_gb : 32
+{
+"os_name" : true,
+"os_version" : true,
+"cpu_type" : true,
+"cpu_cores" : true,
+"memory_bytes" : true,
+"memory_gb" : true,
+"cpu_usage(%)" : false,
+"memory_usage(%)" : false
+}
