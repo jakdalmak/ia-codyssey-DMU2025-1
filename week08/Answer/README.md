@@ -2,7 +2,7 @@
 
 ### 필수 단계1: 이별은 화성, 잊고 있었던 고마운 것들 - 동양미래대 문제 내역
 
-https://jakdalmak-work.notion.site/8-1f0f6bbbe13c807087afc32b21d8f815?pvs=4
+https://jakdalmak-work.notion.site/9-1f6f6bbbe13c8019ae03cfc9308b8b27?pvs=4
 
 ### 풀이자에게 전달 사항
 
