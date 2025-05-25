@@ -5,7 +5,7 @@ import zlib
 from itertools import product
 
 def brute_force_zip_in_memory(zip_path, charset='abcdefghijklmnopqrstuvwxyz0123456789', length=6):
-    # 1) ZIP 전체를 메모리에 읽어 들입니다.
+    # 1) ZIP 전체를 메모리에 읽어 들이기
     with open(zip_path, 'rb') as f:
         zip_bytes = f.read()
 
@@ -13,7 +13,7 @@ def brute_force_zip_in_memory(zip_path, charset='abcdefghijklmnopqrstuvwxyz01234
     buf = io.BytesIO(zip_bytes)
     zf = zipfile.ZipFile(buf)
 
-    # 3) 테스트할 내부 파일 이름을 가져옵니다.
+    # 3) 테스트할 내부 파일 이름을 가져오기.
     name = zf.namelist()[0]
 
     start = time.time()
