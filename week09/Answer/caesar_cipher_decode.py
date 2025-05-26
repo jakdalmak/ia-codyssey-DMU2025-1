@@ -4,7 +4,7 @@ BASE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 PASSWORD_TXT_DIRECTORY = os.path.join(BASE_DIRECTORY, 'password.txt')
 RESULT_TXT_DIRECTORY = os.path.join(BASE_DIRECTORY, 'result.txt')
 
-EXPECTED_WORD_DICT = ('I', 'mars', 'moon') # 실제로는 set으로 구현하지만 '문맥' 상 사전으로 명명함
+EXPECTED_WORD_DICT = {'i', 'mars', 'moon'} # 실제로는 set으로 구현하지만 '문맥' 상 사전으로 명명함
 
 
 # !!! ASCII 코드 십진법 범위 순환구조 설명 !!!
@@ -93,10 +93,11 @@ def check_and_recommand_by_dictionary(caesar_decode_str) :
     
     splited_caesar_decode_str = caesar_decode_str.split(' ')
     
-    for dict_str in EXPECTED_WORD_DICT : # 사전 내 단어와...
-        for caesar_decode_word in splited_caesar_decode_str : # 공백 단위로 구분된 대상 문장의 단어 단위로 체크.
-            if caesar_decode_word.lower() == dict_str.lower() : # 확인 시에는 대소문자 상관없도록 모두 소문자화
-                return caesar_decode_word
+    for caesar_decode_word in splited_caesar_decode_str : 
+        if caesar_decode_word.lower() in EXPECTED_WORD_DICT : # # 공백 단위로 구분된 대상 문장의 단어 단위로 체크. 
+            # 확인 시에는 대소문자 상관없도록 모두 소문자화. 
+            # set은 불변객체므로 모두 소문자로 기입할 것을 유의할 것
+            return caesar_decode_word
     return '' 
 
 def main() :
