@@ -38,16 +38,20 @@ def caesar_cipher_decode(target_text) :
                 tempChrList.append(str_no_space_list[i])
                 continue
             
-            # 지금 다루는 문자가 소문자/대문자 확인하여 이를 기반으로 진행.
-            if str_no_space_list[i].islower() :
-                integerASCII = (ord(str_no_space_list[i]) - lower_base + count) % 26 # 아스키 코드 10진값 확인
-                tempChrList.append(chr(lower_base + integerASCII))
-            elif str_no_space_list[i].isupper() :
-                integerASCII = (ord(str_no_space_list[i]) - upper_base + count) % 26 # 아스키 코드 10진값 확인
-                tempChrList.append(chr(upper_base + integerASCII))
-            else :
-                raise ValueError('integerASCII는 lower, upper로 구분가능한 문자가 아닙니다. 학! 씨-')
-
+            try : 
+                # 지금 다루는 문자가 소문자/대문자 확인하여 이를 기반으로 진행.
+                if str_no_space_list[i].islower() :
+                    integerASCII = (ord(str_no_space_list[i]) - lower_base + count) % 26 # 아스키 코드 10진값 확인
+                    tempChrList.append(chr(lower_base + integerASCII))
+                elif str_no_space_list[i].isupper() :
+                    integerASCII = (ord(str_no_space_list[i]) - upper_base + count) % 26 # 아스키 코드 10진값 확인
+                    tempChrList.append(chr(upper_base + integerASCII))
+                else :
+                    print('문자 디코딩 불가: 영문자 외 문자가 포함되어 있습니다. 카이사르 암호화 대상은 영문 대/소문자 여야합니다.')
+                    os._exit(1)
+            except ValueError : 
+                print('ValueError 에러 발생 : 암호문은 아스키코드로 변환 가능한 문자여야합니다.')
+                os.exit(1)
         caesar_decode_str = ''.join(tempChrList)
         
         caesar_decode_str_list.append(caesar_decode_str)
@@ -97,7 +101,7 @@ def check_and_recommand_by_dictionary(caesar_decode_str) :
 
 def main() :
     try :
-        with open(PASSWORD_TXT_DIRECTORY, 'r') as file : 
+        with open(PASSWORD_TXT_DIRECTORY, 'r', encoding='UTF-8') as file : 
             original_password = file.readline()
             # print(original_password) # 잘 읽어와지는지 검증
             
