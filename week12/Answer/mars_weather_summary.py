@@ -28,9 +28,6 @@ CSV_DIR = os.path.join(BASE_DIR, 'mars_weathers_data.csv')
 PNG_DIR= os.path.join(BASE_DIR, 'mars_weather_summary.png')
 
 class MySQLHelper:
-    """
-    Helper for MySQL connections and queries.
-    """
 
     def __init__(self, host, user, password, database):
         self.host = host
@@ -40,9 +37,6 @@ class MySQLHelper:
         self.connection = None
 
     def connect(self):
-        """
-        Establish a connection to the MySQL database.
-        """
         self.connection = mysql.connector.connect(
             host=self.host,
             user=self.user,
@@ -51,25 +45,16 @@ class MySQLHelper:
         )
 
     def close(self):
-        """
-        Close the database connection.
-        """
         if self.connection:
             self.connection.close()
 
     def execute(self, query, params=None):
-        """
-        Execute a single query (INSERT, UPDATE, DELETE).
-        """
         cursor = self.connection.cursor()
         cursor.execute(query, params or ())
         self.connection.commit()
         cursor.close()
 
     def fetchall(self, query, params=None):
-        """
-        Execute a SELECT query and fetch all results.
-        """
         cursor = self.connection.cursor()
         cursor.execute(query, params or ())
         results = cursor.fetchall()
@@ -78,12 +63,6 @@ class MySQLHelper:
 
 
 def read_csv_file(file_path):
-    """
-    Read mars weather data from a CSV file.
-
-    Returns:
-        List of tuples (mars_date, temp_int, storm_int).
-    """
     data = []
     with open(file_path, 'r', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
@@ -97,9 +76,6 @@ def read_csv_file(file_path):
 
 
 def insert_data(helper, data_list):
-    """
-    Insert data into mars_weather table.
-    """
     insert_sql = (
         'INSERT INTO mars_weather (mars_date, temp, storm) '
         'VALUES (%s, %s, %s)'
@@ -115,12 +91,6 @@ def insert_data(helper, data_list):
 
 
 def generate_summary_image(helper, image_path):
-    """
-    Query the table and generate a line plot of temperature over time,
-    then save as a PNG image.
-
-    Note: The "결과는 png 이미지로 저장" 요구사항은 이 시각화 결과를 가리킵니다.
-    """
     query = (
         'SELECT mars_date, temp '
         'FROM mars_weather '
