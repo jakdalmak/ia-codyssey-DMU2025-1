@@ -32,6 +32,7 @@ list argument :
 
 transcribe argument :
   --keyword        CSV 파일 내에서 검색할 키워드 (선택)
+  --chunksize      STT 구간(초 단위) 설정 (기본 5초)
 """
 
 import os
@@ -57,6 +58,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RECORDS_DIR = os.path.join(BASE_DIR, 'records')  # 녹음 파일을 저장할 폴더 이름
 DEFAULT_SAMPLERATE = 44100     # 표준 샘플링 레이트 (Hz)
 DEFAULT_CHANNELS = 1           # 모노 녹음
+DEFAULT_CHUNK_SIZE = 1.0       # STT 시 분할 시간 (초)
 
 # ------------------------------------------------------------------------------
 # 유틸리티 함수
@@ -185,44 +187,55 @@ def list_recordings(start_date: datetime.date, end_date: datetime.date):
         print(f"\n[{start_date} ~ {end_date}] 범위에 속하는 녹음 파일이 없습니다.\n")
 
 # ------------------------------------------------------------------------------
-# STT 및 CSV 저장 기능
+# STT 및 CSV 저장 기능 (분할 및 시간 기록)
 # ------------------------------------------------------------------------------
 
-def transcribe_file(wav_path: str):
+def transcribe_file(wav_path: str, chunk_size: float = DEFAULT_CHUNK_SIZE):
     '''
-    WAV 파일을 읽어 STT 후 동일 이름 CSV로 저장한다.
+    WAV 파일을 지정된 간격(chunk_size)으로 분할해서 STT 처리 후,
+    각 구간의 시작 시간을 CSV에 기록한다.
     '''
     if sr is None:
         print('speech_recognition 모듈이 설치되지 않았습니다. pip install SpeechRecognition 후 다시 시도해주세요.')
         return
-    recognizer = sr.Recognizer()
-    with sr.AudioFile(wav_path) as src:
-        audio = recognizer.record(src)
-    try:
-        text = recognizer.recognize_google(audio, language='ko-KR')
-    except sr.UnknownValueError:
-        text = ''
-    except sr.RequestError as e:
-        print(f'STT 요청 오류: {e}')
-        return
+    # 오디오 정보 조회
+    with sf.SoundFile(wav_path) as f:
+        total_frames = f.frames
+        samplerate = f.samplerate
+    total_duration = total_frames / samplerate
 
+    recognizer = sr.Recognizer()
     csv_name = os.path.splitext(os.path.basename(wav_path))[0] + '.csv'
     csv_path = os.path.join(RECORDS_DIR, csv_name)
+
+    ensure_records_dir()
     with open(csv_path, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(['time', 'text'])
-        writer.writerow([0.0, text])
+        start = 0.0
+        while start < total_duration:
+            with sr.AudioFile(wav_path) as source:
+                audio = recognizer.record(source, offset=start, duration=chunk_size)
+            try:
+                text = recognizer.recognize_google(audio, language='ko-KR')
+            except sr.UnknownValueError:
+                text = ''
+            except sr.RequestError as e:
+                print(f'STT 요청 오류 at {start}s: {e}')
+                break
+            writer.writerow([round(start, 3), text])
+            start += chunk_size
     print(f"[STT] '{wav_path}' -> '{csv_name}' 저장 완료")
 
 
-def transcribe_all():
+def transcribe_all(chunk_size: float = DEFAULT_CHUNK_SIZE):
     '''
     records 폴더 내 모든 WAV 파일에 대해 STT 처리
     '''
     ensure_records_dir()
     for fname in sorted(os.listdir(RECORDS_DIR)):
         if fname.lower().endswith('.wav'):
-            transcribe_file(os.path.join(RECORDS_DIR, fname))
+            transcribe_file(os.path.join(RECORDS_DIR, fname), chunk_size)
 
 
 def search_keyword(keyword: str):
@@ -270,12 +283,14 @@ def main():
     list_parser = subparsers.add_parser('list', help='날짜 범위 녹음 파일 조회')
     list_parser.add_argument('--start', type=parse_date_string, required=True,
                              help='시작 날짜 YYYYMMDD 또는 YYYY-MM-DD')
-    list_parser.add_argument('--end',       type=parse_date_string, required=True,
+    list_parser.add_argument('--end', type=parse_date_string, required=True,
                              help='종료 날짜 YYYYMMDD 또는 YYYY-MM-DD')
 
     trans_parser = subparsers.add_parser('transcribe', help='STT 실행 및 CSV 저장/검색')
     trans_parser.add_argument('--keyword', type=str, default=None,
                               help='CSV 내 검색할 키워드 (선택)')
+    trans_parser.add_argument('--chunksize', type=float, default=DEFAULT_CHUNK_SIZE,
+                              help='STT 분할 시간(초 단위)')
 
     args = parser.parse_args()
 
@@ -297,7 +312,7 @@ def main():
         if args.keyword:
             search_keyword(keyword=args.keyword)
         else:
-            transcribe_all()
+            transcribe_all(chunk_size=args.chunksize)
     else:
         parser.print_help()
 
