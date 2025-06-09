@@ -8,11 +8,11 @@
 """
 사용 방법 :
 
-javis.py {{command}} {{argument}}
+python .\javis.py {{command}} {{argument}}
 
 ex. 
-javis.py record -d 3.0 => 3초동안 녹음 진행
-javis.py list --start 20250602 --end 20250603
+python .\javis.py record -d 3.0 => 3초동안 녹음 진행
+python .\javis.py list --start 20250602 --end 20250603
 
 와 같이 CMD에서 인자와 함께 사용해주세요. IDE의 Run 버튼으로는 동작이 불가능합니다.
 
@@ -40,7 +40,6 @@ import argparse
 import datetime
 import sounddevice as sd
 import soundfile as sf
-import numpy as np
 
 
 
@@ -262,7 +261,8 @@ def main():
         '--start',
         type=parse_date_string,
         required=True,
-        help='조회 시작 날짜. \'YYYYMMDD\' 또는 \'YYYY-MM-DD\' 형식'
+        help='조회 시작 날짜. \'YYYYMMDD\' 또는 \'YYYY-' \
+        'MM-DD\' 형식'
     )
     list_parser.add_argument(
         '--end',
